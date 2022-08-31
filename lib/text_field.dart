@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppTextField extends StatefulWidget {
-  AppTextField({
+  const AppTextField({
     Key? key,
     required this.controller,
     required this.focus,
@@ -52,6 +52,8 @@ class _AppTextFieldState extends State<AppTextField> {
             enableSuggestions: false,
             maxLength: 25,
             validator: (value) {
+              RegExp regexpAZ = RegExp(r'^(?=.*[A-Z])');
+              RegExp regexpNumber = RegExp(r'(?=.*?[0-9])');
               if (widget.keyboardType == TextInputType.emailAddress) {
                 if (!value!.contains('@')) {
                   return 'Нет знака "@"!';
@@ -63,8 +65,16 @@ class _AppTextFieldState extends State<AppTextField> {
                   return 'Некорректный адрес почты!';
                 }
               }
+              if (widget.keyboardType == TextInputType.visiblePassword) {
+                if (value!.length < 8) {
+                  return 'Пароль должен содержать не меньше 8 символов!';
+                } else if (!regexpAZ.hasMatch(value)) {
+                  return 'Пароль должен содержать одну заглавную букву!';
+                } else if (!regexpNumber.hasMatch(value)) {
+                  return 'Пароль должен содержать одну цифру!';
+                }
+              }
               return null;
-              
             },
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
