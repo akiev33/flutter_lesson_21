@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lesson_21/text_field.dart';
 
@@ -28,29 +29,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late FocusNode emailFocus;
-  late FocusNode passwordFocus;
-
   final Map userData = {'эльдар': '1234', 'фарш': '123'};
+
   String isAuth = '';
 
   final email = TextEditingController();
   final password = TextEditingController();
+  final emailFocus = FocusNode();
+  final passwordFocus = FocusNode();
 
   //
 
   @override
   void initState() {
-    super.initState();
-    emailFocus = FocusNode();
-    passwordFocus = FocusNode();
-
     email.addListener(() {
+      if (email.text.length > 4) {
+        isEmailFilled = true;
+      } else {
+        isEmailFilled = false;
+      }
       setState(() {});
     });
     password.addListener(() {
+      if (password.text.length > 4) {
+        isPasswordFilled = true;
+      } else {
+        isPasswordFilled = false;
+      }
       setState(() {});
     });
+
+    super.initState();
   }
 
   @override
@@ -61,6 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
     passwordFocus.dispose();
     super.dispose();
   }
+
+  final formKey = GlobalKey<FormState>();
+  bool isEmailFilled = false;
+  bool isPasswordFilled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -75,54 +88,56 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    // mainAxisSize: MainAxisSize.min,
-                    // crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppTextField(
-                        title: 'Email',
-                        controller: email,
-                        focus: emailFocus,
-                        onSubmitted: (v) {
-                          passwordFocus.requestFocus();
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      AppTextField(
-                        title: 'Password',
-                        controller: password,
-                        focus: passwordFocus,
-                        onSubmitted: (v) {
-                          authUser();
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () {
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppTextField(
+                          title: 'Email',
+                          controller: email,
+                          focus: emailFocus,
+                          keyboardType: TextInputType.emailAddress,
+                          onSubmitted: (v) {
+                            passwordFocus.requestFocus();
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        AppTextField(
+                          title: 'Password',
+                          controller: password,
+                          focus: passwordFocus,
+                          isObscure: true,
+                          keyboardType: TextInputType.visiblePassword,
+                          onSubmitted: (v) {
                             authUser();
                           },
-                          child: const Text('Join'),
                         ),
-                      ),
-                      const SizedBox(height: 50),
-                      Center(child: Text(isAuth)),
-                    ],
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: isEmailFilled && isPasswordFilled
+                                ? () {
+                                    formKey.currentState?.validate();
+                                    authUser();
+                                  }
+                                : null,
+                            child: const Text('Join'),
+                          ),
+                        ),
+                        const SizedBox(height: 50),
+                        Center(child: Text(isAuth)),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              // const SizedBox(height: 60),
-              // Text('Email - ${email.text}'),
-              // const SizedBox(height: 12),
-              // Text('Password - ${password.text}'),
-              // const SizedBox(height: 150),
-              // const SizedBox(
-              //   height: 20,
-              // ),
+              const SizedBox(height: 50),
               Center(
                 child: RichText(
                   text: const TextSpan(
